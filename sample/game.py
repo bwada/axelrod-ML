@@ -7,7 +7,7 @@ import agents
 import payouts
 
 MAX_GAME_ITERATIONS = 100
-CONST_GAME = True
+CONST_GAME = False
 CONST_GAME_NUM = 10
 
 @dataclass
