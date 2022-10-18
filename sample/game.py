@@ -7,18 +7,19 @@ import agents
 import payouts
 
 MAX_GAME_ITERATIONS = 100
-CONST_GAME = False
-CONST_GAME_NUM = 10
+DEBUG = False
 
 @dataclass
 class game:
-    last_game_prob: float
     payout: np.array
     player_1: Any
     player_2: Any
     p1_score: float = 0
     p2_score: float = 0
     print_rounds = False
+    last_game_prob = 0.2
+    const_game = True
+    const_game_num = 10
 
     def round(self):
         """
@@ -39,30 +40,58 @@ class game:
             return False
     
     def play_game(self):
-        if CONST_GAME == True:
+        if self.const_game == True:
             return self.play_const_num_game()
         for i in range(MAX_GAME_ITERATIONS):
             if self.round():
                 if self.print_rounds:
-                    print(f"Final Score: {self.p1_score}:{self.p2_score}")
+                    self.print_final_score()
                 return
         raise Exception("exceeded maximum number of iterations")
     
     def play_const_num_game(self):
-        for i in range(CONST_GAME_NUM):
+        for i in range(self.const_game_num):
             self.round()
         if self.print_rounds:
-            print(f"Final Score: {self.p1_score}:{self.p2_score}")
+            self.print_final_score()
+    
+    def print_final_score(self):
+        print(f"Final Score: {self.p1_score}:{self.p2_score}")
 
     def set_printing(self, print_bool):
         self.print_rounds = print_bool
+    
+    def set_const_game(self, num_games):
+        self.const_game = True
+        self.const_game_num = num_games
+    
+    def set_rand_game(self, last_game_prob):
+        self.const_game = False
+        self.last_game_prob = last_game_prob
+
+def who_am_i(agent):
+    cheater = agents.always_cheat()
+    colaborator = agents.always_colab()
+    t_for_t = agents.tit_for_tat()
+    alt = agents.alternator()
+    players = [cheater,colaborator,t_for_t,alt]
+    names = ["cheater","colaborator","t_for_t","alt"]
+    for p,n in zip(players,names):
+        agent.reset()
+        who_am_i_game = game(payouts.standard_payout, agent, p)
+        who_am_i_game.play_game()
+        print(f"against {n}:")
+        who_am_i_game.print_final_score()
+        agent.reset()
+    print()
 
 def test_1():
     last_game_prob = 0.2
     player_1 = agents.simple_rnn()
     player_2 = agents.simple_rnn()
     payout = payouts.standard_payout
-    g = game(last_game_prob, payout, player_1, player_2)
+    g = game(payout, player_1, player_2)
+    g.set_rand_game(last_game_prob)
     g.set_printing(True)
     g.play_game()
 
@@ -72,10 +101,12 @@ def main():
     player_1 = agents.human_player()
     player_2 = agents.tit_for_tat()
     payout = payouts.standard_payout
-    g = game(last_game_prob, payout, player_1, player_2)
+    g = game(payout, player_1, player_2)
+    g.set_rand_game(last_game_prob)
     g.set_printing(True)
     g.play_game()
 
 if __name__ == "__main__":
-    #test_1()
+    if DEBUG:
+        test_1()
     main()

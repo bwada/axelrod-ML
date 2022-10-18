@@ -77,6 +77,27 @@ class grudge_holder:
         self.betrayed = False
 
 @dataclass
+class alternator:
+    previous_move = 0
+
+    def make_move(self):
+        if self.previous_move == 1:
+            self.previous_move = 0
+            return 0
+        else:
+            self.previous_move = 1
+            return 1
+    
+    def update(self, other_move):
+        pass
+
+    def spawn_child(self):
+        return alternator()
+    
+    def reset(self):
+        self.previous_move = 0
+
+@dataclass
 class human_player:
     def make_move(self):
         move = None
