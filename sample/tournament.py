@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+import torch
 
 import agents
 import game
@@ -106,6 +107,20 @@ def test_tourney_2():
         print(f"player number {i}")
         game.who_am_i(p)
 
+def example_tit_for_tat():
+    torch.manual_seed(100)
+    players = [agents.simple_rnn() for i in range(10)]
+    tourney = round_robin(payouts.standard_payout, players)
+    for _ in range(20):
+        tourney.round()
+        tourney.print_round()
+        tourney.remove_losers(1)
+        tourney.propagate_best_winners(1)
+        tourney.reset()
+    for i,p in enumerate(tourney.players):
+        print(f"player number {i}")
+        game.who_am_i(p)
+
 def main():
     pass
 
@@ -113,5 +128,5 @@ if __name__ == "__main__":
     if DEBUG:
         test_tourney_1()
         test_tourney_2()
-    test_tourney_2()
+    example_betrayal()
     main()
